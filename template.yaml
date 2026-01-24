@@ -7,11 +7,12 @@ Transform:
 # Resources declares the AWS resources that you want to include in the stack
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
 Resources:
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
-  # This is a Lambda function config associated with the source code: get-all-items.js
-  getAllItemsFunction:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v1
+  
+  AppFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/handlers/app.handler
@@ -25,23 +26,26 @@ Resources:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
       - DynamoDBCrudPolicy:
           TableName: !Ref ProfileTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref ThrottleTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref ProfileTable
+          TABLE_NAME: !Ref ProfileTable
+          THROTTLE_TABLE_NAME: !Ref ThrottleTable
       Events:
         Api:
           Type: Api
           Properties:
             Path: /
             Method: GET
-  # Each Lambda function is defined by properties:
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-
+            RestApiId: !Ref ApiGateway
+            
   ProfileTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: "ProfileTable"
+      TableName: ProfileTable
+      BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
@@ -49,12 +53,17 @@ Resources:
         - AttributeName: id
           KeyType: HASH
 
-Outputs:
-  WebEndpoint:
-    Description: API Gateway endpoint URL for Prod stage
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod/"
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-Globals:
-  Function:
-    LoggingConfig:
-      LogFormat: JSON
+  ThrottleTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: WelcomingApiRateLimit
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true

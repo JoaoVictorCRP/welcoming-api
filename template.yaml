@@ -11,6 +11,10 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: v1
+      Domain:
+        DomainName: welcome.carrijo.dev.br
+        CertificateArn: arn:aws:acm:us-east-1:982081046227:certificate/92e01509-c574-41e8-8326-139b3e8f7025
+        EndpointConfiguration: REGIONAL
   
   AppFunction:
     Type: AWS::Serverless::Function
@@ -40,7 +44,7 @@ Resources:
             Path: /
             Method: GET
             RestApiId: !Ref ApiGateway
-            
+
   ProfileTable:
     Type: AWS::DynamoDB::Table
     Properties:

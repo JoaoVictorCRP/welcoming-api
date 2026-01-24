@@ -52,14 +52,14 @@ export const handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body, null, 2),
     };
   } catch (err) {
     console.error("Unexpected error while processing request:", err);
     return {
       statusCode: 500,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "Internal Server Error! :(" }),
+      body: JSON.stringify({ message: "Internal Server Error! :(" }, null, 2),
     };
   }
 }

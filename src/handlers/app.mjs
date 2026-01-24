@@ -46,7 +46,7 @@ export const handler = async (event, context) => {
       contact: {
         linkedin: "https://www.linkedin.com/in/jo%C3%A3o-victor-carrijo-pereira-651074266/",
         github: "https://github.com/JoaoVictorCRP"
-      },
+      }
     }
     
     return {
